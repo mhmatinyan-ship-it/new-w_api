@@ -1,43 +1,40 @@
 /* ---------------------------------------------------------------
-   Light, minimal styling. Kept simple on purpose so that dark
-   mode and animations can be added later without a rewrite.
-   Colours are defined once as CSS variables near the top.
+   The whole page sits on a full-window sky gradient that reflects
+   whether it's day or night — light blue by day, dark blue by
+   night. Before you search, it guesses from your computer's clock;
+   after you search, it switches to the actual day/night of the
+   place you looked up (WeatherAPI's `current.is_day`).
+
+   Everything else (the "panel" holding the form/result/forecast)
+   is a translucent frosted-glass card, so it reads well over either
+   sky colour. Colours are CSS variables so day vs. night is just a
+   different set of variable values — see the two blocks below.
    --------------------------------------------------------------- */
 
-/* Light palette (default) */
 :root {
-  --bg: #f4f6f8;
-  --card-bg: #ffffff;
-  --text: #1b1f24;
-  --muted: #5a6470;
+  /* Day palette (also the default before JS runs) */
+  --sky-top: #8ec9f0;
+  --sky-bottom: #cfe9fb;
+  --panel-bg: rgba(255, 255, 255, 0.6);
+  --panel-border: rgba(255, 255, 255, 0.85);
+  --card-bg: rgba(255, 255, 255, 0.75);
+  --text: #16233c;
+  --muted: #4d5b73;
   --accent: #2f6feb;
-  --border: #e2e6ea;
+  --border: rgba(22, 35, 60, 0.14);
   --error: #c0392b;
 }
 
-/* Dark palette: applies automatically when the device is set to dark
-   AND the visitor hasn't chosen a theme manually (data-theme="light"). */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #14181f;
-    --card-bg: #1e232c;
-    --text: #eef1f5;
-    --muted: #97a1ad;
-    --accent: #5b8def;
-    --border: #2c3340;
-    --error: #ff6b5e;
-  }
-}
-
-/* Dark palette: applies when the visitor explicitly picked dark mode
-   with the toggle button, regardless of device setting. */
-:root[data-theme="dark"] {
-  --bg: #14181f;
-  --card-bg: #1e232c;
-  --text: #eef1f5;
-  --muted: #97a1ad;
-  --accent: #5b8def;
-  --border: #2c3340;
+:root[data-sky="night"] {
+  --sky-top: #0b1330;
+  --sky-bottom: #1c2c56;
+  --panel-bg: rgba(18, 26, 50, 0.55);
+  --panel-border: rgba(255, 255, 255, 0.12);
+  --card-bg: rgba(255, 255, 255, 0.08);
+  --text: #eef1f7;
+  --muted: #aab2c5;
+  --accent: #6f9bff;
+  --border: rgba(255, 255, 255, 0.16);
   --error: #ff6b5e;
 }
 
@@ -45,57 +42,73 @@
   box-sizing: border-box;
 }
 
+html,
+body {
+  height: 100%;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  background: var(--bg);
+  background-color: var(--sky-top); /* fallback if the layers below can't paint */
   color: var(--text);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   line-height: 1.5;
-  transition: background-color 0.25s ease, color 0.25s ease;
+  transition: color 0.4s ease;
+}
+
+/* Two full-window gradient layers, crossfaded with opacity so the
+   sky changes smoothly instead of snapping when day/night flips. */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  transition: opacity 0.6s ease;
+}
+
+body::before {
+  background: linear-gradient(180deg, #8ec9f0 0%, #cfe9fb 100%);
+  opacity: 1;
+}
+
+body::after {
+  background: linear-gradient(180deg, #0b1330 0%, #1c2c56 100%);
+  opacity: 0;
+}
+
+:root[data-sky="night"] body::before {
+  opacity: 0;
+}
+
+:root[data-sky="night"] body::after {
+  opacity: 1;
 }
 
 .wrap {
   width: 100%;
-  max-width: 420px;
-  padding: 40px 20px;
-}
-
-.top-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 20px;
+  max-width: 460px;
+  padding: 40px 20px 60px;
 }
 
 h1 {
-  margin: 0;
-  font-size: 1.6rem;
+  margin: 0 0 16px;
+  font-size: 1.7rem;
+  transition: color 0.4s ease;
 }
 
-.theme-toggle {
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  font-size: 1.1rem;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text);
-  transition: transform 0.2s ease, background-color 0.25s ease,
-    border-color 0.25s ease;
-}
-
-.theme-toggle:hover {
-  transform: scale(1.08);
-  background: var(--card-bg);
+/* --- The frosted-glass panel holding everything else --- */
+.panel {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 20px;
+  padding: 20px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: background-color 0.4s ease, border-color 0.4s ease;
 }
 
 /* --- Search box + button --- */
@@ -111,10 +124,18 @@ h1 {
   font-size: 1rem;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: var(--card-bg);
+  background: rgba(255, 255, 255, 0.5);
   color: var(--text);
-  transition: background-color 0.25s ease, border-color 0.25s ease,
-    color 0.25s ease;
+  transition: background-color 0.4s ease, border-color 0.4s ease,
+    color 0.4s ease;
+}
+
+:root[data-sky="night"] #city-input {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+#city-input::placeholder {
+  color: var(--muted);
 }
 
 #city-input:focus {
@@ -130,6 +151,8 @@ button {
   background: var(--accent);
   color: #fff;
   cursor: pointer;
+  transition: background-color 0.3s ease, opacity 0.2s ease,
+    transform 0.15s ease;
 }
 
 button:hover {
@@ -144,12 +167,17 @@ button:hover {
   font-size: 0.9rem;
 }
 
+.locate:hover {
+  transform: translateY(-1px);
+}
+
 /* --- Status / error line --- */
 .status {
   min-height: 1.4em;
-  margin: 12px 0;
+  margin: 12px 0 0;
   color: var(--muted);
   font-size: 0.95rem;
+  transition: color 0.4s ease;
 }
 
 .status.error {
@@ -158,12 +186,8 @@ button:hover {
 
 /* --- Result card --- */
 .result {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 20px;
+  margin-top: 16px;
   text-align: center;
-  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
 .result .place {
@@ -208,7 +232,7 @@ button:hover {
 .forecast {
   display: flex;
   gap: 8px;
-  margin-top: 12px;
+  margin-top: 16px;
   overflow-x: auto;
   padding-bottom: 4px;
 }
@@ -220,7 +244,7 @@ button:hover {
   border-radius: 10px;
   padding: 10px 6px;
   text-align: center;
-  transition: background-color 0.25s ease, border-color 0.25s ease,
+  transition: background-color 0.4s ease, border-color 0.4s ease,
     transform 0.15s ease;
   /* Each card is a fresh element every time we render, so this plays
      automatically without needing a class toggled by JS. --delay
@@ -276,10 +300,52 @@ button:hover {
 
 /* Respect visitors who've asked for less motion. */
 @media (prefers-reduced-motion: reduce) {
-  .fade-in {
+  .fade-in,
+  .forecast-day {
     animation: none;
   }
   * {
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------------------------------------------------------------
+   Larger screens: let the page use the space instead of staying a
+   narrow phone-width column. The panel grows wider, text scales up
+   a little, and the forecast switches from a horizontal scroll to a
+   full row of 7 cards.
+   --------------------------------------------------------------- */
+@media (min-width: 700px) {
+  .wrap {
+    max-width: 640px;
+    padding-top: 64px;
+  }
+
+  h1 {
+    font-size: 2.1rem;
+  }
+
+  .panel {
+    padding: 32px;
+  }
+
+  .result .temp {
+    font-size: 3.6rem;
+  }
+}
+
+@media (min-width: 1000px) {
+  .wrap {
+    max-width: 880px;
+  }
+
+  .result .details {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .forecast {
+    overflow-x: visible;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
   }
 }

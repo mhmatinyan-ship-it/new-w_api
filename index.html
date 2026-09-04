@@ -6,50 +6,48 @@
   <title>Weather</title>
   <link rel="stylesheet" href="styles.css" />
   <!--
-    Set the theme BEFORE the page paints, so there is no flash of the
-    wrong colours. If the visitor already chose light/dark before
-    (saved in localStorage), use that. Otherwise leave it unset and
-    styles.css follows the device's system setting automatically.
+    Guess day or night BEFORE the page paints, so there's no flash of
+    the wrong sky colour. This is only a guess from your computer's
+    clock (6am-7pm = day); once a search finishes, app.js switches it
+    to the real day/night of the place you looked up.
   -->
   <script>
     (function () {
-      var saved = localStorage.getItem("theme");
-      if (saved === "light" || saved === "dark") {
-        document.documentElement.setAttribute("data-theme", saved);
-      }
+      var hour = new Date().getHours();
+      var isDay = hour >= 6 && hour < 19;
+      document.documentElement.setAttribute("data-sky", isDay ? "day" : "night");
     })();
   </script>
 </head>
 <body>
   <main class="wrap">
-    <div class="top-row">
-      <h1>Weather</h1>
-      <button id="theme-toggle" type="button" class="theme-toggle" aria-label="Toggle dark mode"></button>
+    <h1>Weather</h1>
+
+    <div class="panel">
+      <!-- Search by city name -->
+      <form id="search-form" class="controls">
+        <input
+          id="city-input"
+          type="text"
+          placeholder="Enter a city, e.g. London"
+          autocomplete="off"
+          aria-label="City name"
+        />
+        <button type="submit">Search</button>
+      </form>
+
+      <!-- Or use the device's location -->
+      <button id="locate-btn" type="button" class="locate">Use my location</button>
+
+      <!-- Status line: loading / error messages appear here -->
+      <p id="status" class="status" role="status"></p>
+
+      <!-- The weather result card is built by app.js and inserted here -->
+      <section id="result" class="result" hidden></section>
+
+      <!-- The multi-day forecast row is built by app.js and inserted here -->
+      <section id="forecast" class="forecast" hidden></section>
     </div>
-
-    <!-- Search by city name -->
-    <form id="search-form" class="controls">
-      <input
-        id="city-input"
-        type="text"
-        placeholder="Enter a city, e.g. London"
-        autocomplete="off"
-        aria-label="City name"
-      />
-      <button type="submit">Search</button>
-    </form>
-
-    <!-- Or use the device's location -->
-    <button id="locate-btn" type="button" class="locate">Use my location</button>
-
-    <!-- Status line: loading / error messages appear here -->
-    <p id="status" class="status" role="status"></p>
-
-    <!-- The weather result card is built by app.js and inserted here -->
-    <section id="result" class="result" hidden></section>
-
-    <!-- The multi-day forecast row is built by app.js and inserted here -->
-    <section id="forecast" class="forecast" hidden></section>
   </main>
 
   <script src="app.js"></script>

@@ -17,9 +17,6 @@ const locateBtn = document.getElementById("locate-btn");
 const statusEl = document.getElementById("status");
 const resultEl = document.getElementById("result");
 const forecastEl = document.getElementById("forecast");
-const themeToggle = document.getElementById("theme-toggle");
-
-initTheme();
 
 // --- Event: user typed a city and pressed Search / Enter ---
 form.addEventListener("submit", (event) => {
@@ -73,6 +70,7 @@ async function getWeather(query) {
 
     render(data);
     renderForecast(data);
+    applySky(data.current.is_day); // switch to the searched place's real day/night
     setStatus("");
   } catch (err) {
     showError("Network problem. Please check your connection and try again.");
@@ -150,37 +148,14 @@ function renderForecast(data) {
   forecastEl.hidden = false;
 }
 
-// --- Dark mode ---
+// --- Day / night background ---
 
 /**
- * Set the toggle button's icon/label to match whichever theme is
- * currently in effect (explicit choice, or the system preference).
+ * Switch the page's sky background to match day or night.
+ * @param {number|boolean} isDay - WeatherAPI sends 1/0; also accepts true/false.
  */
-function initTheme() {
-  updateToggleIcon();
-  themeToggle.addEventListener("click", () => {
-    const next = effectiveTheme() === "dark" ? "light" : "dark";
-    document.documentElement.setAttribute("data-theme", next);
-    localStorage.setItem("theme", next);
-    updateToggleIcon();
-  });
-}
-
-function effectiveTheme() {
-  const explicit = document.documentElement.getAttribute("data-theme");
-  if (explicit) return explicit;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
-}
-
-function updateToggleIcon() {
-  const isDark = effectiveTheme() === "dark";
-  themeToggle.textContent = isDark ? "☀️" : "🌙";
-  themeToggle.setAttribute(
-    "aria-label",
-    isDark ? "Switch to light mode" : "Switch to dark mode"
-  );
+function applySky(isDay) {
+  document.documentElement.setAttribute("data-sky", isDay ? "day" : "night");
 }
 
 // --- Small animation helper ---
