@@ -1,7 +1,8 @@
 # Weather app
 
-A simple page that shows the **current weather** for a city (or your current
-location). Built with plain HTML/CSS/JS and one small Netlify serverless
+A simple page that shows the **current weather and a 7-day forecast** for a
+city (or your current location), with light/dark mode and small fade-in
+animations. Built with plain HTML/CSS/JS and one small Netlify serverless
 function that keeps the API key secret.
 
 ---
@@ -84,4 +85,4 @@ That's it. Every time you `git push`, Netlify redeploys automatically.
 
 ## What's next
 
-Forecast, a °C/°F toggle, dark mode, and small animations — see `CLAUDE.md`.
+A °C/°F toggle and an hourly forecast view — see `CLAUDE.md`.

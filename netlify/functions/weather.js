@@ -31,12 +31,20 @@ exports.handler = async (event) => {
     });
   }
 
-  // 3. Call WeatherAPI's "current weather" endpoint.
+  // 3. Call WeatherAPI's "forecast" endpoint. It conveniently returns
+  //    BOTH current conditions (data.current) and the multi-day
+  //    forecast (data.forecast.forecastday[]) in one response.
+  //
+  //    WeatherAPI's free plan supports up to 3 forecast days; paid
+  //    plans support more. If you're on the free plan and see a plan
+  //    or quota error here, lower FORECAST_DAYS to 3.
+  const FORECAST_DAYS = 7;
   const url =
-    "https://api.weatherapi.com/v1/current.json" +
+    "https://api.weatherapi.com/v1/forecast.json" +
     "?key=" + encodeURIComponent(apiKey) +
     "&q=" + encodeURIComponent(query) +
-    "&aqi=no";
+    "&days=" + FORECAST_DAYS +
+    "&aqi=no&alerts=no";
 
   try {
     const upstream = await fetch(url);

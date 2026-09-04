@@ -5,10 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Weather</title>
   <link rel="stylesheet" href="styles.css" />
+  <!--
+    Set the theme BEFORE the page paints, so there is no flash of the
+    wrong colours. If the visitor already chose light/dark before
+    (saved in localStorage), use that. Otherwise leave it unset and
+    styles.css follows the device's system setting automatically.
+  -->
+  <script>
+    (function () {
+      var saved = localStorage.getItem("theme");
+      if (saved === "light" || saved === "dark") {
+        document.documentElement.setAttribute("data-theme", saved);
+      }
+    })();
+  </script>
 </head>
 <body>
   <main class="wrap">
-    <h1>Weather</h1>
+    <div class="top-row">
+      <h1>Weather</h1>
+      <button id="theme-toggle" type="button" class="theme-toggle" aria-label="Toggle dark mode"></button>
+    </div>
 
     <!-- Search by city name -->
     <form id="search-form" class="controls">
@@ -30,6 +47,9 @@
 
     <!-- The weather result card is built by app.js and inserted here -->
     <section id="result" class="result" hidden></section>
+
+    <!-- The multi-day forecast row is built by app.js and inserted here -->
+    <section id="forecast" class="forecast" hidden></section>
   </main>
 
   <script src="app.js"></script>

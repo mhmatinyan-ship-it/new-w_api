@@ -4,6 +4,7 @@
    Colours are defined once as CSS variables near the top.
    --------------------------------------------------------------- */
 
+/* Light palette (default) */
 :root {
   --bg: #f4f6f8;
   --card-bg: #ffffff;
@@ -11,6 +12,33 @@
   --muted: #5a6470;
   --accent: #2f6feb;
   --border: #e2e6ea;
+  --error: #c0392b;
+}
+
+/* Dark palette: applies automatically when the device is set to dark
+   AND the visitor hasn't chosen a theme manually (data-theme="light"). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14181f;
+    --card-bg: #1e232c;
+    --text: #eef1f5;
+    --muted: #97a1ad;
+    --accent: #5b8def;
+    --border: #2c3340;
+    --error: #ff6b5e;
+  }
+}
+
+/* Dark palette: applies when the visitor explicitly picked dark mode
+   with the toggle button, regardless of device setting. */
+:root[data-theme="dark"] {
+  --bg: #14181f;
+  --card-bg: #1e232c;
+  --text: #eef1f5;
+  --muted: #97a1ad;
+  --accent: #5b8def;
+  --border: #2c3340;
+  --error: #ff6b5e;
 }
 
 * {
@@ -26,6 +54,7 @@ body {
   color: var(--text);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   line-height: 1.5;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 .wrap {
@@ -34,9 +63,39 @@ body {
   padding: 40px 20px;
 }
 
+.top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
 h1 {
-  margin: 0 0 20px;
+  margin: 0;
   font-size: 1.6rem;
+}
+
+.theme-toggle {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  font-size: 1.1rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  transition: transform 0.2s ease, background-color 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.08);
+  background: var(--card-bg);
 }
 
 /* --- Search box + button --- */
@@ -54,6 +113,8 @@ h1 {
   border-radius: 8px;
   background: var(--card-bg);
   color: var(--text);
+  transition: background-color 0.25s ease, border-color 0.25s ease,
+    color 0.25s ease;
 }
 
 #city-input:focus {
@@ -92,7 +153,7 @@ button:hover {
 }
 
 .status.error {
-  color: #c0392b;
+  color: var(--error);
 }
 
 /* --- Result card --- */
@@ -102,6 +163,7 @@ button:hover {
   border-radius: 12px;
   padding: 20px;
   text-align: center;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
 .result .place {
@@ -140,4 +202,84 @@ button:hover {
 
 .result .details span {
   color: var(--muted);
+}
+
+/* --- Forecast row --- */
+.forecast {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.forecast-day {
+  flex: 1 0 64px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 6px;
+  text-align: center;
+  transition: background-color 0.25s ease, border-color 0.25s ease,
+    transform 0.15s ease;
+  /* Each card is a fresh element every time we render, so this plays
+     automatically without needing a class toggled by JS. --delay
+     staggers the cards so they fade in left-to-right. */
+  animation: fadeInUp 0.35s ease both;
+  animation-delay: var(--delay, 0ms);
+}
+
+.forecast-day:hover {
+  transform: translateY(-2px);
+}
+
+.fc-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.forecast-day img {
+  display: block;
+  margin: 0 auto;
+}
+
+.fc-temps {
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+
+.fc-max {
+  font-weight: 600;
+}
+
+.fc-min {
+  color: var(--muted);
+  margin-left: 4px;
+}
+
+/* --- Subtle fade-in used when the result / forecast are (re)rendered --- */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeInUp 0.35s ease both;
+}
+
+/* Respect visitors who've asked for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  .fade-in {
+    animation: none;
+  }
+  * {
+    transition-duration: 0.01ms !important;
+  }
 }

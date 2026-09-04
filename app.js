@@ -16,6 +16,10 @@ const cityInput = document.getElementById("city-input");
 const locateBtn = document.getElementById("locate-btn");
 const statusEl = document.getElementById("status");
 const resultEl = document.getElementById("result");
+const forecastEl = document.getElementById("forecast");
+const themeToggle = document.getElementById("theme-toggle");
+
+initTheme();
 
 // --- Event: user typed a city and pressed Search / Enter ---
 form.addEventListener("submit", (event) => {
@@ -53,6 +57,7 @@ locateBtn.addEventListener("click", () => {
 async function getWeather(query) {
   setStatus("Loading…");
   resultEl.hidden = true;
+  forecastEl.hidden = true;
 
   try {
     const response = await fetch("/api/weather?q=" + encodeURIComponent(query));
@@ -67,6 +72,7 @@ async function getWeather(query) {
     }
 
     render(data);
+    renderForecast(data);
     setStatus("");
   } catch (err) {
     showError("Network problem. Please check your connection and try again.");
@@ -101,6 +107,90 @@ function render(data) {
     </div>
   `;
   resultEl.hidden = false;
+  playFadeIn(resultEl);
+}
+
+/**
+ * Build the row of day cards from data.forecast.forecastday[].
+ * Each entry has .date, .day.{maxtemp_c, mintemp_c, condition}.
+ */
+function renderForecast(data) {
+  const days = data.forecast && data.forecast.forecastday;
+  if (!days || !days.length) {
+    forecastEl.hidden = true;
+    return;
+  }
+
+  const todayStr = new Date().toISOString().slice(0, 10);
+
+  forecastEl.innerHTML = days
+    .map((entry, index) => {
+      const label =
+        entry.date === todayStr
+          ? "Today"
+          : new Date(entry.date + "T00:00:00").toLocaleDateString(undefined, {
+              weekday: "short",
+            });
+      const day = entry.day;
+      return `
+        <div class="forecast-day" style="--delay: ${index * 40}ms">
+          <div class="fc-label">${escapeHtml(label)}</div>
+          <img src="https:${day.condition.icon}" alt="${escapeHtml(day.condition.text)}" width="36" height="36" />
+          <div class="fc-temps">
+            <span class="fc-max">${Math.round(day.maxtemp_c)}°</span>
+            <span class="fc-min">${Math.round(day.mintemp_c)}°</span>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+
+  // No playFadeIn() needed here: each card is a brand-new element
+  // (see innerHTML above), so its CSS animation plays automatically.
+  forecastEl.hidden = false;
+}
+
+// --- Dark mode ---
+
+/**
+ * Set the toggle button's icon/label to match whichever theme is
+ * currently in effect (explicit choice, or the system preference).
+ */
+function initTheme() {
+  updateToggleIcon();
+  themeToggle.addEventListener("click", () => {
+    const next = effectiveTheme() === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    localStorage.setItem("theme", next);
+    updateToggleIcon();
+  });
+}
+
+function effectiveTheme() {
+  const explicit = document.documentElement.getAttribute("data-theme");
+  if (explicit) return explicit;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
+}
+
+function updateToggleIcon() {
+  const isDark = effectiveTheme() === "dark";
+  themeToggle.textContent = isDark ? "☀️" : "🌙";
+  themeToggle.setAttribute(
+    "aria-label",
+    isDark ? "Switch to light mode" : "Switch to dark mode"
+  );
+}
+
+// --- Small animation helper ---
+
+// Restart a CSS animation on an element (used after re-rendering it
+// with new content) by removing and re-adding the class.
+function playFadeIn(el) {
+  el.classList.remove("fade-in");
+  void el.offsetWidth; // force the browser to notice the class was removed
+  el.classList.add("fade-in");
 }
 
 // --- Small helpers ---
@@ -114,6 +204,7 @@ function showError(text) {
   statusEl.textContent = text;
   statusEl.classList.add("error");
   resultEl.hidden = true;
+  forecastEl.hidden = true;
 }
 
 // Prevent odd place names from injecting HTML into the page.
