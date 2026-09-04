@@ -1,0 +1,16 @@
+# Netlify configuration. Netlify reads this automatically on deploy,
+# so you do not have to fill anything into the Netlify dashboard build
+# settings.
+
+[build]
+  # No build step — the site is plain HTML/CSS/JS. Publish the repo root.
+  publish = "."
+  # Where our serverless functions live.
+  functions = "netlify/functions"
+
+# Give the function a tidy public URL: /api/weather -> the function.
+# status = 200 means "serve it here" (a rewrite), not a redirect.
+[[redirects]]
+  from = "/api/weather"
+  to = "/.netlify/functions/weather"
+  status = 200

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Weather</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="wrap">
+    <h1>Weather</h1>
+
+    <!-- Search by city name -->
+    <form id="search-form" class="controls">
+      <input
+        id="city-input"
+        type="text"
+        placeholder="Enter a city, e.g. London"
+        autocomplete="off"
+        aria-label="City name"
+      />
+      <button type="submit">Search</button>
+    </form>
+
+    <!-- Or use the device's location -->
+    <button id="locate-btn" type="button" class="locate">Use my location</button>
+
+    <!-- Status line: loading / error messages appear here -->
+    <p id="status" class="status" role="status"></p>
+
+    <!-- The weather result card is built by app.js and inserted here -->
+    <section id="result" class="result" hidden></section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

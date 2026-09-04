@@ -1,0 +1,143 @@
+/* ---------------------------------------------------------------
+   Light, minimal styling. Kept simple on purpose so that dark
+   mode and animations can be added later without a rewrite.
+   Colours are defined once as CSS variables near the top.
+   --------------------------------------------------------------- */
+
+:root {
+  --bg: #f4f6f8;
+  --card-bg: #ffffff;
+  --text: #1b1f24;
+  --muted: #5a6470;
+  --accent: #2f6feb;
+  --border: #e2e6ea;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+}
+
+.wrap {
+  width: 100%;
+  max-width: 420px;
+  padding: 40px 20px;
+}
+
+h1 {
+  margin: 0 0 20px;
+  font-size: 1.6rem;
+}
+
+/* --- Search box + button --- */
+.controls {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+#city-input {
+  flex: 1;
+  padding: 10px 12px;
+  font-size: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card-bg);
+  color: var(--text);
+}
+
+#city-input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+button {
+  padding: 10px 14px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.92;
+}
+
+.locate {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 8px 12px;
+  font-size: 0.9rem;
+}
+
+/* --- Status / error line --- */
+.status {
+  min-height: 1.4em;
+  margin: 12px 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.status.error {
+  color: #c0392b;
+}
+
+/* --- Result card --- */
+.result {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.result .place {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.result .region {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+}
+
+.result .temp {
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.result .condition {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 6px 0 16px;
+  color: var(--muted);
+}
+
+.result .details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 16px;
+  font-size: 0.95rem;
+  text-align: left;
+}
+
+.result .details span {
+  color: var(--muted);
+}
